@@ -5,6 +5,6 @@ import PackageDescription
 let package = Package(
     name: "SqlNode",
     dependencies: [
-      .Package(url: "https://github.com/yuanchi/TreeNode.git", majorVersion: 1)
+      .Package(url: "https://github.com/yuanchi/TreeNode.git", Version(1, 0, 8))
     ]
 )
