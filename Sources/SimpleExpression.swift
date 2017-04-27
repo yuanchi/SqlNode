@@ -1,4 +1,4 @@
-open class SimpleExpression: SqlNode, SelfAliasible {
+open class SimpleExpression: SqlNode, SelfAliasible, Expressible {
   public typealias Me = SimpleExpression
   public var alias: String = ""
   public var expression: String = ""
