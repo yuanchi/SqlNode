@@ -114,6 +114,15 @@ class FilterConditionsTests: XCTestCase {
       + "WHERE a.balance < 10000) OR p.success = 1)"
     XCTAssertEqual(sql, fc.toSql())
   }
+  func lcVal() {
+    let fc = FilterConditions()
+    let me = fc.and("p.name = :pname").lcVal("Bob")
+    XCTAssertTrue(fc === me)
+    XCTAssertEqual("Bob", (fc.children.last as! SimpleCondition).paramVal as? String)
+
+    _ = fc.and("p.age < :page").lcVal(33)
+    XCTAssertEqual(33, (fc.children.last as! SimpleCondition).paramVal as? Int)
+  }
   static var allTests = [
     ("andSingleCondition", andSingleCondition),
     ("orSingleCondition", orSingleCondition),
@@ -121,5 +130,6 @@ class FilterConditionsTests: XCTestCase {
     ("orMultiConditions", orMultiConditions),
     ("andSubqueryCondition", andSubqueryCondition),
     ("orSubqueryCondition", orSubqueryCondition),
+    ("lcVal", lcVal),
   ]
 }
