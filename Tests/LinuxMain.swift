@@ -8,5 +8,6 @@ XCTMain([
     testCase(SimpleConditionTests.allTests),
     testCase(TargetExpressibleTests.allTests),
     testCase(SelectExpressionTests.allTests),
-    testCase(FromTests.allTests)
+    testCase(FromTests.allTests),
+    testCase(FilterConditionsTests.allTests),
 ])
