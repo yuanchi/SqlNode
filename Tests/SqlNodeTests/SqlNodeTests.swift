@@ -76,11 +76,64 @@ class SqlNodeTests: XCTestCase {
       XCTAssertFalse(n2_2.getStart() === n1)
       XCTAssertTrue(root.getStart() == nil)
     }
+    func subscriptWithCondition() {
+      let root = RootNode.initialize()
+        .select("e.id", "e.firstname", "e.lastname", "p.level", "acc.balc")
+        .from{
+          _ = $0.t("EMPLOYEE").as("e")
+          .leftOuterJoin("POINT").as("p")
+          .on("e.id = p.emp_id")
+          .leftOuterJoin{
+            _ = $0.select().t("a.emp_id").as("emid")
+              .t("a.balance").as("balc")
+              .t("a.address").as("addr").getStart()!
+              .from("ACCOUNT", as: "a")
+              .where().and("a.balance > 3000").lcId("balAmount")
+                .or("a.openDate > '2011-01-01'").lcId("oDate")
+          }.as("acc")
+          .on("e.id = acc.emid")
+        }
+        .where("MONTH(e.birth) = 3", "YEAR(e.startDate) = 2010")
 
+      let sql = "SELECT e.id, e.firstname, e.lastname, p.level, acc.balc\n"
+        + "FROM EMPLOYEE as e\n"
+        + "LEFT OUTER JOIN POINT as p\n"
+        + "ON e.id = p.emp_id\n"
+        + "LEFT OUTER JOIN (SELECT a.emp_id as emid, a.balance as balc, a.address as addr\n"
+        + "FROM ACCOUNT as a\n"
+        + "WHERE a.balance > 3000 OR a.openDate > '2011-01-01') as acc\n"
+        + "ON e.id = acc.emid\n"
+        + "WHERE MONTH(e.birth) = 3 AND YEAR(e.startDate) = 2010"
+      XCTAssertEqual(sql, root.toSql())
+
+      let f1 = root[.id("balAmount")]
+      XCTAssertTrue(f1 as? SimpleCondition != nil)
+      XCTAssertEqual("a.balance > 3000", (f1 as! SimpleCondition).expression)
+
+      let f2 = root[.id("oDate")]
+      XCTAssertTrue(f2 as? SimpleCondition != nil)
+      XCTAssertEqual("a.openDate > '2011-01-01'", (f2 as! SimpleCondition).expression)
+
+      let f3 = root[.alias("a")]
+      XCTAssertTrue(f3 as? SimpleExpression != nil)
+      XCTAssertEqual("ACCOUNT", (f3 as! SimpleExpression).expression)
+
+      let f4 = root[.alias("acc")]
+      XCTAssertTrue(f4 as? SelectExpression != nil)
+      let select = "(SELECT a.emp_id as emid, a.balance as balc, a.address as addr\n"
+        + "FROM ACCOUNT as a\n"
+        + "WHERE a.balance > 3000 OR a.openDate > '2011-01-01') as acc"
+      XCTAssertEqual(select, (f4 as! SelectExpression).toSql())
+
+      let f5 = root[.expression("a.balance > 3000")]
+      XCTAssertTrue(f5 as? SimpleCondition != nil)
+      XCTAssertEqual("a.balance > 3000", (f5 as! SimpleCondition).expression)
+    }
     static var allTests = [
         ("create", create),
         ("root", root),
         ("topMost", topMost),
-        ("getStart", getStart)
+        ("getStart", getStart),
+        ("subscriptWithCondition", subscriptWithCondition),
     ]
 }
