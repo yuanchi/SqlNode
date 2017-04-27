@@ -16,7 +16,7 @@ open class SqlNode: TreeNode, Identifiable {
   override open subscript(idx: Int...) -> SqlNode? {
     return findChildBy(idx: idx)
   }
-  subscript(_ condition: SearchType) -> SqlNode? {
+  public subscript(_ condition: SearchType) -> SqlNode? {
     let val = condition.val
     var found: SqlNode? = nil
     switch condition {
