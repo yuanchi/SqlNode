@@ -52,6 +52,12 @@ open class FilterConditions: SqlNode, Junctible {
     _ = sc.subquery(with: config)
     return self
   }
+  public func lcVal(_ val: Any) -> Self {
+    if var f = children.last as? SingleParameterizable {
+      f.paramVal = val
+    }
+    return self
+  }
   public func conditionSql() -> String {
     if sqlChildren.isEmpty {
       return ""
