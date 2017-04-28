@@ -52,7 +52,7 @@ open class FilterConditions: SqlNode, Junctible {
     _ = sc.subquery(with: config)
     return self
   }
-  public func lcVal(_ val: Any) -> Self {
+  public func paramVal(_ val: Any) -> Self {
     if var f = children.last as? SingleParameterizable {
       f.paramVal = val
     }
@@ -75,5 +75,19 @@ open class FilterConditions: SqlNode, Junctible {
       return ""
     }
     return  children.count == 1 ? "\(prefixJunction())\(condSql)" : "\(prefixJunction())(\(condSql))"
+  }
+  public func removeConditionsWithParamValNil() -> Self {
+    _ = removeIf{
+      $0 is SingleParameterizable
+      && ($0 as! SingleParameterizable).paramVal == nil
+    }
+    return self
+  }
+  /*
+  * access all not nil param values(with Array.flatMap(_:))
+  */
+  public func condParamVals() -> [Any] {
+    return find{ $0 is SingleParameterizable } // transfrom nested structure to array
+      .flatMap{ ($0 as? SingleParameterizable)?.paramVal }
   }
 }
