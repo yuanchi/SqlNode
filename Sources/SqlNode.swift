@@ -21,21 +21,21 @@ open class SqlNode: TreeNode, Identifiable {
     var found: SqlNode? = nil
     switch condition {
     case .id(_):
-      found = findFirst{ n in
+      found = findFirst { n in
         if let casted = n as? Identifiable {
           return casted.id == val
         }
         return false
       } as? SqlNode
     case .alias(_):
-      found = findFirst{ n in
+      found = findFirst { n in
         if let casted = n as? Aliasible {
           return casted.alias == val
         }
         return false
       } as? SqlNode
     case .expression(_):
-      found = findFirst{ n in
+      found = findFirst { n in
         if let casted = n as? Expressible {
           return casted.expression == val
         }
