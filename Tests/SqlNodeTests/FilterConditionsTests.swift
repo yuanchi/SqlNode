@@ -116,12 +116,74 @@ class FilterConditionsTests: XCTestCase {
   }
   func lcVal() {
     let fc = FilterConditions()
-    let me = fc.and("p.name = :pname").lcVal("Bob")
+    let me = fc.and("p.name = :pname").paramVal("Bob")
     XCTAssertTrue(fc === me)
     XCTAssertEqual("Bob", (fc.children.last as! SimpleCondition).paramVal as? String)
 
-    _ = fc.and("p.age < :page").lcVal(33)
+    _ = fc.and("p.age < :page").paramVal(33)
     XCTAssertEqual(33, (fc.children.last as! SimpleCondition).paramVal as? Int)
+  }
+  func removeConditionsWithParamValNil() {
+    let fc = FilterConditions()
+    _ = fc.and("e.firstname LIKE :fname").paramVal("Rachel")
+      .and("e.lastname LIKE :lname").paramVal("Carson")
+      .and("e.age > :age")
+      .or{
+        _ = $0.and("e.salary > :salary")
+          .and("e.manager = :manager").paramVal("Bob")
+      }
+    var sql = "AND (e.firstname LIKE :fname AND e.lastname LIKE :lname AND e.age > :age OR (e.salary > :salary AND e.manager = :manager))"
+    XCTAssertEqual(sql, fc.toSql())
+
+    _ = fc.removeConditionsWithParamValNil()
+    sql = "AND (e.firstname LIKE :fname AND e.lastname LIKE :lname OR e.manager = :manager)"
+    XCTAssertEqual(sql, fc.toSql())
+
+    let f1 = fc[.expression("e.age > :age")]
+    XCTAssertTrue( f1 == nil )
+
+    let f2 = fc[.expression("e.salary > :salary")]
+    XCTAssertTrue( f2 == nil )
+
+    let f3 = fc[.expression("e.lastname LIKE :lname")]
+    XCTAssertFalse( f3 == nil )
+  }
+  func condParamVals() {
+    let fc = FilterConditions()
+    _ = fc.and("e.firstname LIKE :fname").paramVal("Rachel")
+      .and("e.lastname LIKE :lname").paramVal("Carson")
+      .and("e.age > :age")
+      .or{
+        _ = $0.and("e.salary > :salary").paramVal(2000)
+          .and("e.manager = :manager")
+      }
+    let paramVals = fc.condParamVals()
+    XCTAssertEqual(3, paramVals.count)
+
+    XCTAssertTrue(paramVals[0] as? String != nil)
+    XCTAssertEqual("Rachel", paramVals[0] as! String)
+
+    XCTAssertTrue(paramVals[1] as? String != nil)
+    XCTAssertEqual("Carson", paramVals[1] as! String)
+
+    XCTAssertTrue(paramVals[2] as? Int != nil)
+    XCTAssertEqual(2000, paramVals[2] as! Int)
+  }
+  func namedParamVals() {
+    let fc = FilterConditions()
+    _ = fc.and("e.firstname LIKE :fname").paramVal("Rachel")
+      .and("e.lastname LIKE :lname").paramVal("Carson")
+      .and("e.age > :age")
+      .or{
+        _ = $0.and("e.salary > :salary").paramVal(2000)
+          .and("e.manager = :manager")
+      }
+    let paramVals = fc.namedParamVals()
+    XCTAssertEqual(3, paramVals.count)
+
+    XCTAssertEqual(paramVals["fname"] as! String, "Rachel")
+    XCTAssertEqual(paramVals["lname"] as! String, "Carson")
+    XCTAssertEqual(paramVals["salary"] as! Int, 2000)
   }
   static var allTests = [
     ("andSingleCondition", andSingleCondition),
@@ -131,5 +193,8 @@ class FilterConditionsTests: XCTestCase {
     ("andSubqueryCondition", andSubqueryCondition),
     ("orSubqueryCondition", orSubqueryCondition),
     ("lcVal", lcVal),
+    ("removeConditionsWithParamValNil", removeConditionsWithParamValNil),
+    ("condParamVals", condParamVals),
+    ("namedParamVals", namedParamVals),
   ]
 }
