@@ -1,3 +1,4 @@
+import TreeNode
 open class FilterConditions: SqlNode, Junctible {
   var junction: Junction = .AND
 
@@ -52,6 +53,9 @@ open class FilterConditions: SqlNode, Junctible {
     _ = sc.subquery(with: config)
     return self
   }
+  /*
+  * if the last child is SingleParameterizable, add param value to it
+  */
   public func paramVal(_ val: Any) -> Self {
     if var f = children.last as? SingleParameterizable {
       f.paramVal = val
@@ -77,7 +81,7 @@ open class FilterConditions: SqlNode, Junctible {
     return  children.count == 1 ? "\(prefixJunction())\(condSql)" : "\(prefixJunction())(\(condSql))"
   }
   public func removeConditionsWithParamValNil() -> Self {
-    _ = removeIf{
+    _ = removeIf {
       $0 is SingleParameterizable
       && ($0 as! SingleParameterizable).paramVal == nil
     }
@@ -87,7 +91,33 @@ open class FilterConditions: SqlNode, Junctible {
   * access all not nil param values(with Array.flatMap(_:))
   */
   public func condParamVals() -> [Any] {
-    return find{ $0 is SingleParameterizable } // transfrom nested structure to array
-      .flatMap{ ($0 as? SingleParameterizable)?.paramVal }
+    return find { $0 is SingleParameterizable } // transfrom nested structure to array
+      .flatMap { ($0 as? SingleParameterizable)?.paramVal }
+  }
+  static func getParamName(of input: String) -> String? {
+    if let idx = input.characters.index(of: ":") {
+      let pos = input.distance(from: input.startIndex, to: idx) + 1
+      let name = input[input.index(input.startIndex, offsetBy: pos)..<input.endIndex]
+      return name
+    }
+    return nil
+  }
+  public func namedParamVals() -> [String: Any] {
+    return find {
+      $0 is SimpleCondition
+      && ($0 as! SimpleCondition).paramVal != nil
+    }
+    .map { (s: TreeNode) -> (String, Any) in
+      let cond = s as! SimpleCondition
+      let name = FilterConditions.getParamName(of: cond.expression)!
+      let pv = cond.paramVal!
+      return (name, pv)
+    }
+    .reduce([String: Any]()) { (result, kvpair) in
+      var dict = result
+      dict[kvpair.0] = kvpair.1
+      return dict
+    }
+
   }
 }
