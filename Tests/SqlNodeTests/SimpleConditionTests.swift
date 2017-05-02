@@ -10,7 +10,22 @@ class SimpleConditionTests: XCTestCase {
     sc.junction = .OR
     XCTAssertEqual("p.guid = 'uier009'", sc.toSql())
   }
+  func copy() {
+    var sc = SimpleCondition()
+    sc.junction = .OR
+    sc.expression = "p.name = :name"
+    sc.paramVal = "Bob"
+    let copy = sc.copy()
+
+    XCTAssertFalse(copy === sc)
+    XCTAssertEqual(Junction.OR, copy.junction)
+    XCTAssertEqual("p.name = :name", copy.expression)
+    XCTAssertTrue(sc.param === copy.param)
+    XCTAssertEqual("Bob", copy.paramVal as! String)
+    XCTAssertEqual(sc.toSql(), copy.toSql())
+  }
   static var allTests = [
-      ("toSql", toSql)
+      ("toSql", toSql),
+      ("copy", copy),
   ]
 }

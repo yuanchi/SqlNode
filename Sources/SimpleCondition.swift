@@ -6,4 +6,11 @@ open class SimpleCondition: SqlNode, Junctible, SingleParameterizable, Expressib
   override open func toSql() -> String {
     return "\(expression)"
   }
+  override open func copy() -> SimpleCondition {
+    let copy = super.copy() as! SimpleCondition
+    copy.junction = self.junction
+    copy.expression = self.expression
+    copy.param = self.param
+    return copy
+  }
 }
