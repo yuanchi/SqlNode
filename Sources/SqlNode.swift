@@ -1,7 +1,9 @@
 import TreeNode
 open class SqlNode: TreeNode, Identifiable {
 
+  public var id = ""
   public var factory: SqlNodeFactory?
+
   public var root: RootNode? {
     return topMost() as? RootNode
   }
@@ -11,7 +13,6 @@ open class SqlNode: TreeNode, Identifiable {
   public var sqlChildren: [SqlNode] {
     return children as! [SqlNode]
   }
-  public var id = ""
 
   override open subscript(idx: Int...) -> SqlNode? {
     return findChildBy(idx: idx)
@@ -78,5 +79,11 @@ open class SqlNode: TreeNode, Identifiable {
       f.id = id
     }
     return self
+  }
+  override open func copy() -> SqlNode {
+    let copied = super.copy() as! SqlNode
+    copied.id = self.id
+    copied.factory = self.factory
+    return copied
   }
 }
