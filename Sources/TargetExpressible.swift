@@ -5,12 +5,9 @@ open class TargetExpressible: SqlNode {
     return add(child: se)
   }
   public func `as`(_ alias: String) -> Self {
-    var found = children.last as? Aliasible
-    precondition(
-      found != nil,
-      "last child not existed or its type is not Aliasible"
-    )
-    found!.`as`(with: alias)
+    if let found = children.last as? Aliasible {
+      found.alias = alias
+    }
     return self
   }
   public func subquery() -> SelectExpression {
