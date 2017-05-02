@@ -255,6 +255,18 @@ class SelectExpressionTests: XCTestCase {
     let copy = se.copy()
     XCTAssertEqual(sql, copy.toSql())
   }
+  func runtimeAddNewNode() {
+    let se = SelectExpression()
+    _ = se.select("*")
+      .from("sales")
+      .orderBy("sale_date DESC")
+      .add(child: SqlNode(with: "LIMIT 10"))
+    let sql = "SELECT *\n"
+      + "FROM sales\n"
+      + "ORDER BY sale_date DESC\n"
+      + "LIMIT 10"
+    XCTAssertEqual(sql, se.toSql())
+  }
   static var allTests = [
       ("findFirstOrNew", findFirstOrNew),
       ("select", select),
@@ -269,5 +281,6 @@ class SelectExpressionTests: XCTestCase {
       ("orderByConfig", orderByConfig),
       ("toSql", toSql),
       ("copy", copy),
+      ("runtimeAddNewNode", runtimeAddNewNode)
   ]
 }
