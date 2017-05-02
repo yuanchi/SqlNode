@@ -8,4 +8,10 @@ open class SimpleExpression: SqlNode, SelfAliasible, Expressible {
     }
     return "\(expression) as \(alias)"
   }
+  override open func copy() -> SimpleExpression {
+    let copy = super.copy() as! SimpleExpression
+    copy.alias = self.alias
+    copy.expression = self.expression
+    return copy
+  }
 }

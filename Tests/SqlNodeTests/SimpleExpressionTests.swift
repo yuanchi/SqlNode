@@ -4,7 +4,7 @@ import XCTest
 class SimpleExpressionTests: XCTestCase {
 
   func aliasGetterSetter() {
-    var se = SimpleExpression()
+    let se = SimpleExpression()
     let alias = "EMPLOYEE"
     _ = se.`as`(alias)
     XCTAssertEqual(alias, se.alias)
@@ -21,9 +21,21 @@ class SimpleExpressionTests: XCTestCase {
     se.alias = "e"
     XCTAssertEqual("EMPLOYEE as e", se.toSql())
   }
+  func copy() {
+    let se = SimpleExpression()
+    se.expression = "EMPLOYEE"
+    _ = se.as("e")
+    let copy = se.copy()
+
+    XCTAssertFalse(se === copy)
+    XCTAssertEqual("EMPLOYEE", copy.expression)
+    XCTAssertEqual("e", copy.alias)
+    XCTAssertEqual(se.toSql(), copy.toSql())
+  }
 
   static var allTests = [
       ("aliasGetterSetter", aliasGetterSetter),
-      ("toSql", toSql)
+      ("toSql", toSql),
+      ("copy", copy),
   ]
 }
