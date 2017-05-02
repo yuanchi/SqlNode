@@ -8,12 +8,12 @@ class FilterConditionsTests: XCTestCase {
     XCTAssertTrue(fc === me)
     XCTAssertTrue((fc.children[0] as? SimpleCondition) != nil)
     XCTAssertEqual("e.id > 1000", (fc.children[0] as! SimpleCondition).expression)
-    XCTAssertEqual("AND e.id > 1000", fc.toSql())
+    XCTAssertEqual("e.id > 1000", fc.toSql())
 
     _ = fc.and("e.age < 50")
     XCTAssertTrue((fc.children[1] as? SimpleCondition) != nil)
     XCTAssertEqual("e.age < 50", (fc.children[1] as! SimpleCondition).expression)
-    XCTAssertEqual("AND (e.id > 1000 AND e.age < 50)", fc.toSql())
+    XCTAssertEqual("e.id > 1000 AND e.age < 50", fc.toSql())
   }
   func orSingleCondition() {
     let fc = FilterConditions()
@@ -21,12 +21,12 @@ class FilterConditionsTests: XCTestCase {
     XCTAssertTrue(fc === me)
     XCTAssertTrue((fc.children[0] as? SimpleCondition) != nil)
     XCTAssertEqual("e.id > 1000", (fc.children[0] as! SimpleCondition).expression)
-    XCTAssertEqual("AND e.id > 1000", fc.toSql())
+    XCTAssertEqual("e.id > 1000", fc.toSql())
 
     _ = fc.or("e.age < 50")
     XCTAssertTrue((fc.children[1] as? SimpleCondition) != nil)
     XCTAssertEqual("e.age < 50", (fc.children[1] as! SimpleCondition).expression)
-    XCTAssertEqual("AND (e.id > 1000 OR e.age < 50)", fc.toSql())
+    XCTAssertEqual("e.id > 1000 OR e.age < 50", fc.toSql())
   }
   func andMultiConditions() {
     let fc = FilterConditions()
@@ -34,14 +34,14 @@ class FilterConditionsTests: XCTestCase {
       _ = $0.and("e.id > 1000")
     }
     XCTAssertTrue(fc === me)
-    XCTAssertEqual("AND e.id > 1000", fc.toSql())
+    XCTAssertEqual("e.id > 1000", fc.toSql())
 
     fc.children.removeAll()
     _ = fc.and{
       _ = $0.and("e.id > 1000")
         .and("e.age < 50")
     }
-    XCTAssertEqual("AND (e.id > 1000 AND e.age < 50)", fc.toSql())
+    XCTAssertEqual("(e.id > 1000 AND e.age < 50)", fc.toSql())
 
     fc.children.removeAll()
     _ = fc.and("e.gender = 0")
@@ -49,7 +49,7 @@ class FilterConditionsTests: XCTestCase {
         _ = $0.and("e.id > 1000")
           .and("e.age < 50")
       }
-    XCTAssertEqual("AND (e.gender = 0 AND (e.id > 1000 AND e.age < 50))", fc.toSql())
+    XCTAssertEqual("e.gender = 0 AND (e.id > 1000 AND e.age < 50)", fc.toSql())
   }
   func orMultiConditions() {
     let fc = FilterConditions()
@@ -57,14 +57,14 @@ class FilterConditionsTests: XCTestCase {
       _ = $0.and("e.id > 1000")
     }
     XCTAssertTrue(fc === me)
-    XCTAssertEqual("AND e.id > 1000", fc.toSql())
+    XCTAssertEqual("e.id > 1000", fc.toSql())
 
     fc.children.removeAll()
     _ = fc.and{
       _ = $0.and("e.id > 1000")
         .or("e.age < 50")
     }
-    XCTAssertEqual("AND (e.id > 1000 OR e.age < 50)", fc.toSql())
+    XCTAssertEqual("(e.id > 1000 OR e.age < 50)", fc.toSql())
 
     fc.children.removeAll()
     _ = fc.and("e.gender = 0")
@@ -72,7 +72,7 @@ class FilterConditionsTests: XCTestCase {
         _ = $0.and("e.id > 1000")
           .or("e.age < 50")
       }
-    XCTAssertEqual("AND (e.gender = 0 OR (e.id > 1000 OR e.age < 50))", fc.toSql())
+    XCTAssertEqual("e.gender = 0 OR (e.id > 1000 OR e.age < 50)", fc.toSql())
   }
   func andSubqueryCondition() {
     let fc = FilterConditions()
@@ -83,15 +83,15 @@ class FilterConditionsTests: XCTestCase {
     })
     XCTAssertTrue(fc === me)
 
-    var sql = "AND p.id IN (SELECT a.id as id\n"
+    var sql = "p.id IN (SELECT a.id as id\n"
       + "FROM account as a\n"
       + "WHERE a.balance < 10000)"
     XCTAssertEqual(sql, fc.toSql())
 
     _ = fc.and("p.success = 1")
-    sql = "AND (p.id IN (SELECT a.id as id\n"
+    sql = "p.id IN (SELECT a.id as id\n"
       + "FROM account as a\n"
-      + "WHERE a.balance < 10000) AND p.success = 1)"
+      + "WHERE a.balance < 10000) AND p.success = 1"
     XCTAssertEqual(sql, fc.toSql())
   }
   func orSubqueryCondition() {
@@ -103,15 +103,15 @@ class FilterConditionsTests: XCTestCase {
     })
     XCTAssertTrue(fc === me)
 
-    var sql = "AND p.id IN (SELECT a.id as id\n"
+    var sql = "p.id IN (SELECT a.id as id\n"
       + "FROM account as a\n"
       + "WHERE a.balance < 10000)"
     XCTAssertEqual(sql, fc.toSql())
 
     _ = fc.or("p.success = 1")
-    sql = "AND (p.id IN (SELECT a.id as id\n"
+    sql = "p.id IN (SELECT a.id as id\n"
       + "FROM account as a\n"
-      + "WHERE a.balance < 10000) OR p.success = 1)"
+      + "WHERE a.balance < 10000) OR p.success = 1"
     XCTAssertEqual(sql, fc.toSql())
   }
   func lcVal() {
@@ -132,11 +132,11 @@ class FilterConditionsTests: XCTestCase {
         _ = $0.and("e.salary > :salary")
           .and("e.manager = :manager").paramVal("Bob")
       }
-    var sql = "AND (e.firstname LIKE :fname AND e.lastname LIKE :lname AND e.age > :age OR (e.salary > :salary AND e.manager = :manager))"
+    var sql = "e.firstname LIKE :fname AND e.lastname LIKE :lname AND e.age > :age OR (e.salary > :salary AND e.manager = :manager)"
     XCTAssertEqual(sql, fc.toSql())
 
     _ = fc.removeConditionsWithParamValNil()
-    sql = "AND (e.firstname LIKE :fname AND e.lastname LIKE :lname OR e.manager = :manager)"
+    sql = "e.firstname LIKE :fname AND e.lastname LIKE :lname OR e.manager = :manager"
     XCTAssertEqual(sql, fc.toSql())
 
     let f1 = fc[.expression("e.age > :age")]
