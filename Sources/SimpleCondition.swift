@@ -4,6 +4,6 @@ open class SimpleCondition: SqlNode, Junctible, SingleParameterizable, Expressib
   lazy var param: SqlParameter? = SqlParameter()
 
   override open func toSql() -> String {
-    return "\(prefixJunction())\(expression)"
+    return "\(expression)"
   }
 }
