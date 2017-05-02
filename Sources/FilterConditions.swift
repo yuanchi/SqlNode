@@ -1,4 +1,3 @@
-import TreeNode
 open class FilterConditions: SqlNode, Junctible {
   var junction: Junction = .AND
 
@@ -113,7 +112,7 @@ open class FilterConditions: SqlNode, Junctible {
     return find {
       $0 is SimpleCondition
       && ($0 as! SimpleCondition).paramVal != nil
-    }
+    }/*
     .map { (s: TreeNode) -> (String, Any) in
       let cond = s as! SimpleCondition
       let name = FilterConditions.getParamName(of: cond.expression)!
@@ -124,7 +123,14 @@ open class FilterConditions: SqlNode, Junctible {
       var dict = result
       dict[kvpair.0] = kvpair.1
       return dict
+    }*/
+    .reduce([String: Any]()) { (result, condition) in
+      let cond = condition as! SimpleCondition
+      let pv = cond.paramVal!
+      let name = FilterConditions.getParamName(of: cond.expression)!
+      var dict = result
+      dict[name] = pv
+      return dict
     }
-
   }
 }
