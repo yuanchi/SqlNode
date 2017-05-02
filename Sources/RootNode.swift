@@ -5,4 +5,8 @@ open class RootNode: SelectExpression {
     root.factory = SqlNodeFactory.initialize()
     return root
   }
+  override open func copy() -> RootNode {
+    let copy = super.copy() as! RootNode
+    return copy
+  }
 }

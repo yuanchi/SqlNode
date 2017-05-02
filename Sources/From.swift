@@ -89,4 +89,8 @@ open class From: TargetExpressible {
     r = r.isEmpty ? r : "FROM \(r)"
     return r
   }
+  override open func copy() -> From {
+    let copy = super.copy() as! From
+    return copy
+  }
 }

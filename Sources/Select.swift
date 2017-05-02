@@ -3,4 +3,8 @@ open class Select: TargetExpressible {
     let body = super.toSql()
     return body.isEmpty ? "" : "SELECT \(body)"
   }
+  override open func copy() -> Select {
+    let copy = super.copy() as! Select
+    return copy
+  }
 }
