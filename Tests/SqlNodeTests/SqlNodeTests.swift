@@ -129,11 +129,42 @@ class SqlNodeTests: XCTestCase {
       XCTAssertTrue(f5 as? SimpleCondition != nil)
       XCTAssertEqual("a.balance > 3000", (f5 as! SimpleCondition).expression)
     }
+    func copy() {
+      let root = SqlNode()
+      let c1 = SqlNode()
+      let c2 = SqlNode()
+      let c3 = SqlNode()
+      let c1_1 = SqlNode().id("c1_1")
+      let c1_2 = SqlNode().id("c1_2")
+
+      _ = root.add(children: c1, c2, c3)
+      _ = c1.add(children: c1_1, c1_2)
+
+      let factory = SqlNodeFactory.initialize()
+      root.factory = factory
+      let id = "This is root node"
+      root.id = id
+
+      let copyRoot = root.copy()
+      XCTAssertFalse(root === copyRoot)
+      //XCTAssertTrue(copyRoot is SqlNode)
+      XCTAssertTrue(factory === copyRoot.factory)
+      XCTAssertEqual(id, copyRoot.id)
+
+      let copy_c1_1 = copyRoot[0, 0]!
+      let copy_c1_2 = copyRoot[0, 1]!
+
+      XCTAssertFalse(c1_1 === copy_c1_1)
+      XCTAssertFalse(c1_2 === copy_c1_2)
+      XCTAssertEqual("c1_1", copy_c1_1.id)
+      XCTAssertEqual("c1_2", copy_c1_2.id)
+    }
     static var allTests = [
         ("create", create),
         ("root", root),
         ("topMost", topMost),
         ("getStart", getStart),
         ("subscriptWithCondition", subscriptWithCondition),
+        ("copy", copy),
     ]
 }
