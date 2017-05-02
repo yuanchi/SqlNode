@@ -133,4 +133,9 @@ open class FilterConditions: SqlNode, Junctible {
       return dict
     }
   }
+  override open func copy() -> FilterConditions {
+    let copy = super.copy() as! FilterConditions
+    copy.junction = self.junction
+    return copy
+  }
 }
