@@ -128,7 +128,7 @@ class FilterConditionsTests: XCTestCase {
     _ = fc.and("e.firstname LIKE :fname").paramVal("Rachel")
       .and("e.lastname LIKE :lname").paramVal("Carson")
       .and("e.age > :age")
-      .or{
+      .or {
         _ = $0.and("e.salary > :salary")
           .and("e.manager = :manager").paramVal("Bob")
       }
@@ -153,7 +153,7 @@ class FilterConditionsTests: XCTestCase {
     _ = fc.and("e.firstname LIKE :fname").paramVal("Rachel")
       .and("e.lastname LIKE :lname").paramVal("Carson")
       .and("e.age > :age")
-      .or{
+      .or {
         _ = $0.and("e.salary > :salary").paramVal(2000)
           .and("e.manager = :manager")
       }
@@ -174,7 +174,7 @@ class FilterConditionsTests: XCTestCase {
     _ = fc.and("e.firstname LIKE :fname").paramVal("Rachel")
       .and("e.lastname LIKE :lname").paramVal("Carson")
       .and("e.age > :age")
-      .or{
+      .or {
         _ = $0.and("e.salary > :salary").paramVal(2000)
           .and("e.manager = :manager")
       }
@@ -184,6 +184,22 @@ class FilterConditionsTests: XCTestCase {
     XCTAssertEqual(paramVals["fname"] as! String, "Rachel")
     XCTAssertEqual(paramVals["lname"] as! String, "Carson")
     XCTAssertEqual(paramVals["salary"] as! Int, 2000)
+  }
+  func copy() {
+    let fc = FilterConditions()
+    _ = fc.and("e.firstname LIKE :fname").paramVal("Rachel")
+      .and("e.lastname LIKE :lname").paramVal("Carson")
+      .and("e.age > :age")
+      .or {
+        _ = $0.and("e.salary > :salary").paramVal(2000)
+          .and("e.manager = :manager")
+      }
+    let copy = fc.copy()
+    XCTAssertFalse(copy === fc)
+    XCTAssertEqual(copy.toSql(), fc.toSql())
+    XCTAssertEqual(
+      (copy[.expression("e.lastname LIKE :lname")] as! SimpleCondition).paramVal as! String,
+      (fc[.expression("e.lastname LIKE :lname")] as! SimpleCondition).paramVal as! String)
   }
   static var allTests = [
     ("andSingleCondition", andSingleCondition),
@@ -196,5 +212,6 @@ class FilterConditionsTests: XCTestCase {
     ("removeConditionsWithParamValNil", removeConditionsWithParamValNil),
     ("condParamVals", condParamVals),
     ("namedParamVals", namedParamVals),
+    ("copy", copy)
   ]
 }

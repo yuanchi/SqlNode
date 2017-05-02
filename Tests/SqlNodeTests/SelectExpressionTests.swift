@@ -24,7 +24,7 @@ class SelectExpressionTests: XCTestCase {
     let se = SelectExpression()
     _ = se.select().t("p.name").as("name").getStart()!
       .from("PERSON", as: "p")
-      .as("per")
+      .as("per") // this alias will be ignored because not used
     let sql = "SELECT p.name as name\n"
       + "FROM PERSON as p"
     XCTAssertEqual(sql, se.toSql())
@@ -236,6 +236,25 @@ class SelectExpressionTests: XCTestCase {
       + "ORDER BY e.id DESC, e.age ASC, e.salary DESC"
     XCTAssertEqual(sql, se.toSql())
   }
+  func copy() {
+    let se = SelectExpression()
+    _ = se.select().t("e.firstname").as("fname")
+        .t("e.lastname").as("lname")
+        .t("e.salary").as("salary").getStart()!
+      .from("EMPLOYEE", as: "e")
+      .where()
+        .and("e.startDate > '2011-11-12'")
+        .or{
+          _ = $0.and("e.points > 100")
+            .and("e.manager LIKE 'Bob'")
+        }
+    let sql = "SELECT e.firstname as fname, e.lastname as lname, e.salary as salary\n"
+      + "FROM EMPLOYEE as e\n"
+      + "WHERE e.startDate > '2011-11-12' OR (e.points > 100 AND e.manager LIKE 'Bob')"
+    XCTAssertEqual(sql, se.toSql())
+    let copy = se.copy()
+    XCTAssertEqual(sql, copy.toSql())
+  }
   static var allTests = [
       ("findFirstOrNew", findFirstOrNew),
       ("select", select),
@@ -248,6 +267,7 @@ class SelectExpressionTests: XCTestCase {
       ("whereConfig", whereConfig),
       ("orderByTargets", orderByTargets),
       ("orderByConfig", orderByConfig),
-      ("toSql", toSql)
+      ("toSql", toSql),
+      ("copy", copy),
   ]
 }
