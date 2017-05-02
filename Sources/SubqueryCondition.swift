@@ -4,7 +4,7 @@ open class SubqueryCondition: TargetExpressible, Junctible {
   override open func toSql() -> String {
     if let first = sqlChildren.first(where: { $0 is SelectExpression}) {
       let selectExpr = first.toSql()
-      return "\(prefixJunction())\(prefix) \(selectExpr)"
+      return "\(prefix) \(selectExpr)"
     }
     return ""
   }
