@@ -90,7 +90,7 @@ open class SelectExpression: SqlNode, SelfAliasible {
     case is Having:
       return 6
     default:
-      return 0
+      return 7
     }
   }
   override open func toSql() -> String {
