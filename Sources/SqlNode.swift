@@ -3,12 +3,6 @@ open class SqlNode: TreeNode, Identifiable {
 
   public var id = ""
   public var factory: SqlNodeFactory?
-  public var sql = ""
-
-  required public init() {}
-  required public init(with sql: String) {
-    self.sql = sql
-  }
 
   public var root: RootNode? {
     return topMost() as? RootNode
@@ -65,7 +59,7 @@ open class SqlNode: TreeNode, Identifiable {
     return topMost(as: SqlNode.self)!
   }
   open func toSql() -> String {
-    return sql
+    fatalError("toSql method not overrided")
   }
   public func getStart() -> SelectExpression? {
     return closest(to: SelectExpression.self)
@@ -90,7 +84,6 @@ open class SqlNode: TreeNode, Identifiable {
     let copy = super.copy() as! SqlNode
     copy.id = self.id
     copy.factory = self.factory
-    copy.sql = self.sql
     return copy
   }
 }
