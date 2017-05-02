@@ -8,4 +8,10 @@ open class SubqueryCondition: TargetExpressible, Junctible {
     }
     return ""
   }
+  override open func copy() -> SubqueryCondition {
+    let copy = super.copy() as! SubqueryCondition
+    copy.junction = self.junction
+    copy.prefix = self.prefix
+    return copy
+  }
 }
