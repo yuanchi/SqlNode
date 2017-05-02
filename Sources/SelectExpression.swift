@@ -99,15 +99,19 @@ open class SelectExpression: SqlNode, SelfAliasible {
       let second = SelectExpression.readingOrder(of: $1)
       return first - second < 0
     }
-    let isRoot = topMost() === self
     let s = "\n"
     var r = sqlChildren.map{ $0.toSql()}
       .filter{ !$0.isEmpty }
       .joined(separator: s)
-    if !isRoot {
+    if parent != nil {
       r = "(\(r))"
       r = alias.isEmpty ? r : "\(r) as \(alias)"
     }
     return r
+  }
+  override open func copy() -> SelectExpression {
+    let copy = super.copy() as! SelectExpression
+    copy.alias = self.alias
+    return copy
   }
 }
