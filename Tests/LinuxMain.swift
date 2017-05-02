@@ -10,4 +10,5 @@ XCTMain([
     testCase(SelectExpressionTests.allTests),
     testCase(FromTests.allTests),
     testCase(FilterConditionsTests.allTests),
+    testCase(SubqueryConditionTests.allTests),
 ])
