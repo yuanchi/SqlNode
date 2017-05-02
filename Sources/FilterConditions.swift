@@ -66,11 +66,18 @@ open class FilterConditions: SqlNode, Junctible {
     if sqlChildren.isEmpty {
       return ""
     }
-    let firstJunct = (sqlChildren.first as! Junctible).prefixJunction()
-    var r = sqlChildren.map{ $0.toSql() }
-      .joined(separator: " ")
-    let range = firstJunct.startIndex..<firstJunct.endIndex
-    r.characters.removeSubrange(range)
+    var r = sqlChildren.first!.toSql()
+    let separator = " "
+    for (idx, ele) in sqlChildren.enumerated() {
+      if idx == 0 {
+        continue
+      }
+      if let junc = ele as? Junctible {
+        r += (separator + junc.prefixJunction() + ele.toSql())
+      } else {
+        r += (separator + ele.toSql())
+      }
+    }
     return r
   }
   override open func toSql() -> String {
@@ -78,7 +85,7 @@ open class FilterConditions: SqlNode, Junctible {
     guard !condSql.isEmpty else {
       return ""
     }
-    return  children.count == 1 ? "\(prefixJunction())\(condSql)" : "\(prefixJunction())(\(condSql))"
+    return  children.count > 1 && parent != nil ? "(\(condSql))" : "\(condSql)"
   }
   public func removeConditionsWithParamValNil() -> Self {
     _ = removeIf {
