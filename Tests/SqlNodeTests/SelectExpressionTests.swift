@@ -20,6 +20,15 @@ class SelectExpressionTests: XCTestCase {
             + "FROM PERSON as p"
     XCTAssertEqual(sql, se.toSql())
   }
+  func select() {
+    let se = SelectExpression()
+    _ = se.select().t("p.name").as("name").getStart()!
+      .from("PERSON", as: "p")
+      .as("per")
+    let sql = "SELECT p.name as name\n"
+      + "FROM PERSON as p"
+    XCTAssertEqual(sql, se.toSql())
+  }
   func selectTargets() {
     let se = SelectExpression()
     let me = se.select("s.fistname", "s.lastname", "s.address")
@@ -229,6 +238,7 @@ class SelectExpressionTests: XCTestCase {
   }
   static var allTests = [
       ("findFirstOrNew", findFirstOrNew),
+      ("select", select),
       ("selectTargets", selectTargets),
       ("selectConfig", selectConfig),
       ("fromTargets", fromTargets),
