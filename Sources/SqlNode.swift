@@ -81,9 +81,9 @@ open class SqlNode: TreeNode, Identifiable {
     return self
   }
   override open func copy() -> SqlNode {
-    let copied = super.copy() as! SqlNode
-    copied.id = self.id
-    copied.factory = self.factory
-    return copied
+    let copy = super.copy() as! SqlNode
+    copy.id = self.id
+    copy.factory = self.factory
+    return copy
   }
 }
