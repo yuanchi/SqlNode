@@ -1,7 +1,7 @@
 open class CustomExpression: SqlNode, Expressible {
   public var expression = ""
   required public init() {}
-  required public init(with expression: String) {
+  required public init(_ expression: String) {
     super.init()
     self.expression = expression
   }
