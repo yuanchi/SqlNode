@@ -1,4 +1,5 @@
 open class RootNode: SelectExpression {
+  public var pageNavigator: PageNavigator?
 
   public class func initialize() -> RootNode {
     let root = RootNode()
@@ -9,4 +10,5 @@ open class RootNode: SelectExpression {
     let copy = super.copy() as! RootNode
     return copy
   }
+  
 }
