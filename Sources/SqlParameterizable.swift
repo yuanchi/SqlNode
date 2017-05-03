@@ -1,6 +1,6 @@
 protocol SqlParameterizable {}
 
-protocol SingleParameterizable: SqlParameterizable {
+protocol SingleParameterizable: class, SqlParameterizable {
   var param: SqlParameter? { get set }
   var paramVal: Any? { get set }
 }
