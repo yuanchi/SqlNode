@@ -51,9 +51,65 @@ class RootNodeTests: XCTestCase {
     XCTAssertEqual(10, paramVals[2] as! Int)
     XCTAssertEqual(1, paramVals[3] as! Int)
   }
+  func paging() {
+    let root = RootNode.initialize()
+      .select("a.id", "a.name")
+      .from("ACCOUNT", as: "a")
+      .where {
+        _ = $0.and("a.open > ?")
+          .or("a.open < ?")
+      }
+      .orderBy("a.name")
+
+    let pn = PageNavigator(totalCount: 13, countPerPage: 3)
+    pn.currentPage = 3
+
+    root.pageNavigator = pn
+
+    let paging = root.paging()
+    let sql = "SELECT a.id, a.name\n"
+      + "FROM ACCOUNT as a\n"
+      + "WHERE a.open > ? OR a.open < ?\n"
+      + "ORDER BY a.name\n"
+      + "LIMIT 3 OFFSET 6"
+    XCTAssertEqual(sql, paging.toSql())
+  }
+  func oraclePaging() {
+    let root = RootNode.initialize()
+      .select("a.id", "a.name")
+      .from("ACCOUNT", as: "a")
+      .where {
+        _ = $0.and("a.open > ?")
+          .or("a.open < ?")
+      }
+      .orderBy("a.name")
+
+    let paging = RootNode.initialize()
+    _ = paging.select("*")
+      .from { _ = $0.subquery()
+          .select { _ = $0.t("tmp.*").t("rownum").as("rn") }
+          .from()
+            .add(child: root.copy()) // add root copy as child node
+            .as("tmp").getStart()!
+          .where("rownum <= 20")
+      }
+      .where("rn > 10")
+
+    let sql = "SELECT *\n"
+      + "FROM (SELECT tmp.*, rownum as rn\n"
+      +   "FROM (SELECT a.id, a.name\n"
+      +     "FROM ACCOUNT as a\n"
+      +     "WHERE a.open > ? OR a.open < ?\n"
+      +     "ORDER BY a.name) as tmp\n"
+      +   "WHERE rownum <= 20)\n"
+      + "WHERE rn > 10"
+    XCTAssertEqual(sql, paging.toSql())
+  }
 
   static var allTests = [
       ("initialize", initialize),
       ("paramVals", paramVals),
+      ("paging", paging),
+      ("oraclePaging", oraclePaging),
   ]
 }
