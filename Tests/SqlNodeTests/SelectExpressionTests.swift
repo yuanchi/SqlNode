@@ -272,7 +272,7 @@ class SelectExpressionTests: XCTestCase {
       + "LIMIT 10"
     XCTAssertEqual(sql, se.toSql())
 
-    var cond = SimpleCondition()
+    let cond = SimpleCondition()
     cond.expression = "LIMIT ?"
     cond.paramVal = 10
 
