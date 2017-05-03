@@ -257,13 +257,14 @@ class SelectExpressionTests: XCTestCase {
   }
   func runtimeAddNewNode() {
     let se = SelectExpression()
+
     let expr = SimpleExpression()
     expr.expression = "LIMIT 10"
 
     _ = se.select("*")
       .from("sales")
       .orderBy("sale_date DESC")
-      .add(child: expr)
+      .add(child: expr) // it works, but should be avoided
 
     var sql = "SELECT *\n"
       + "FROM sales\n"
@@ -271,12 +272,12 @@ class SelectExpressionTests: XCTestCase {
       + "LIMIT 10"
     XCTAssertEqual(sql, se.toSql())
 
-    _ = se.children.removeLast()
     var cond = SimpleCondition()
     cond.expression = "LIMIT ?"
     cond.paramVal = 10
 
-    _ = se.add(child: cond)
+    _ = se.children.removeLast()
+    _ = se.add(child: cond) // it works, but should be avoided
 
     sql = "SELECT *\n"
       + "FROM sales\n"
