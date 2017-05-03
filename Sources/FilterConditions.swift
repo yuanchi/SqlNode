@@ -56,7 +56,7 @@ open class FilterConditions: SqlNode, Junctible {
   * if the last child is SingleParameterizable, add param value to it
   */
   public func paramVal(_ val: Any) -> Self {
-    if var f = children.last as? SingleParameterizable {
+    if let f = children.last as? SingleParameterizable {
       f.paramVal = val
     }
     return self

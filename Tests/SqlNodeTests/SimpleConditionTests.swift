@@ -11,7 +11,7 @@ class SimpleConditionTests: XCTestCase {
     XCTAssertEqual("p.guid = 'uier009'", sc.toSql())
   }
   func copy() {
-    var sc = SimpleCondition()
+    let sc = SimpleCondition()
     sc.junction = .OR
     sc.expression = "p.name = :name"
     sc.paramVal = "Bob"
