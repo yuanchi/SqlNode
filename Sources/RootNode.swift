@@ -8,6 +8,7 @@ open class RootNode: SelectExpression {
   }
   override open func copy() -> RootNode {
     let copy = super.copy() as! RootNode
+    copy.pageNavigator = self.pageNavigator
     return copy
   }
   /*
@@ -30,5 +31,17 @@ open class RootNode: SelectExpression {
 
     first = first + second
     return first
+  }
+  /*
+  * default is MariaDB paging expression
+  */
+  open func paging() -> RootNode {
+    let copy = self.copy()
+    if let pn = pageNavigator {
+      let sql = "LIMIT \(pn.countPerPage) OFFSET \(pn.offset)"
+      let extra = CustomExpression(sql)
+      _ = copy.add(child: extra)
+    }
+    return copy
   }
 }
