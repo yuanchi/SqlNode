@@ -17,32 +17,18 @@ open class SqlNode: TreeNode, Identifiable {
   override open subscript(idx: Int...) -> SqlNode? {
     return findChildBy(idx: idx)
   }
-  public subscript(_ condition: SearchType) -> SqlNode? {
-    let val = condition.val
-    var found: SqlNode? = nil
-    switch condition {
-    case .id(_):
-      found = findFirst { n in
-        if let casted = n as? Identifiable {
-          return casted.id == val
-        }
-        return false
-      } as? SqlNode
-    case .alias(_):
-      found = findFirst { n in
-        if let casted = n as? Aliasible {
-          return casted.alias == val
-        }
-        return false
-      } as? SqlNode
-    case .expression(_):
-      found = findFirst { n in
-        if let casted = n as? Expressible {
-          return casted.expression == val
-        }
-        return false
-      } as? SqlNode
-    }
+  public subscript(_ searchStrategy: SingleNodeSearchable) -> SqlNode? {
+    let found = searchStrategy.get(from: self)
+    return found
+  }
+  /*
+  * Although SearchType conforms to SingleNodeSearchable,
+  * I think this overload is required for sussinct use.
+  * Without overload ex. SqlNode()[SearchType.id("abc")]
+  * With overload ex. SqlNode()[.id("abc")]  
+  */
+  public subscript(_ searchType: SearchType) -> SqlNode? {
+    let found = searchType.get(from: self)
     return found
   }
 
