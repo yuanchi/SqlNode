@@ -25,13 +25,18 @@ open class SqlNode: TreeNode, Identifiable {
   * Although SearchType conforms to SingleNodeSearchable,
   * I think this overload is required for sussinct use.
   * Without overload ex. SqlNode()[SearchType.id("abc")]
-  * With overload ex. SqlNode()[.id("abc")]  
+  * With overload ex. SqlNode()[.id("abc")]
   */
   public subscript(_ searchType: SearchType) -> SqlNode? {
     let found = searchType.get(from: self)
     return found
   }
-
+  /*
+  * All inner SqlNodes are initializd via this method.
+  * When this method is called, it firstly searches the top most node to check if there is the factory.
+  * If there is no factory existed on the top most node, it will initialize one on its own.
+  * My intent is to keep the consistency, flexibility configurable, use convenience, and try to reduce memory consumption.
+  */
   public func create<T:SqlNode>(with key: T.Type) -> T {
     if let node = topMost().factory?.create(with: key) {
       return node
