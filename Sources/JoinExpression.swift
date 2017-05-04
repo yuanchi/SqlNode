@@ -1,22 +1,13 @@
-open class JoinExpression: SimpleExpression  {
+open class JoinExpression: SqlNode, SelfAliasible, Expressible, Joinable {
   public typealias Me = JoinExpression
   public var joinType: String = ""
+  public var alias: String = ""
+  public var expression: String = ""
 
-  public func join(with type: String) -> Self {
-    self.joinType = type
-    return self
-  }
   public func on() -> On {
     let on = create(with: On.self)
     _ = add(child: on)
     return on
-  }
-  public func on(_ conditions: [String]) -> Self {
-    let on = self.on()
-    for c in conditions {
-      _ = on.and(c)
-    }
-    return self
   }
   override open func toSql() -> String {
     let aliasExpr = alias.isEmpty ? alias : "as \(alias)"
@@ -31,6 +22,8 @@ open class JoinExpression: SimpleExpression  {
   override open func copy() -> JoinExpression {
     let copy = super.copy() as! JoinExpression
     copy.joinType = self.joinType
+    copy.alias = self.alias
+    copy.expression = self.expression
     return copy
   }
 }

@@ -1,22 +1,14 @@
-open class JoinSubquery: JoinExpression {
-  public typealias Me = JoinSubquery
-  public func subquery() -> SelectExpression {
-    let se = create(with: SelectExpression.self)
-    _ = add(child: se)
-    return se
-  }
-  public func subquery(with config: (SelectExpression)-> Void) -> Self {
-    let se = subquery()
-    config(se)
-    return self
-  }
-  public func `as`(with alias: String) {
-    if let found = children.first(where: { $0 is SelectExpression }) as? SelectExpression {
-      found.alias = alias
-    }
+open class JoinSubquery: TargetExpressible, Joinable {
+  var joinType: String = ""
+
+  public func on() -> On {
+    let on = create(with: On.self)
+    _ = add(child: on)
+    return on
   }
   override open func copy() -> JoinSubquery {
     let copy = super.copy() as! JoinSubquery
+    copy.joinType = self.joinType
     return copy
   }
   override open func toSql() -> String {
