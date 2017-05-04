@@ -6,7 +6,7 @@ open class TargetExpressible: SqlNode {
   }
   public func `as`(_ alias: String) -> Self {
     if let found = children.last as? Aliasible {
-      found.alias = alias
+      found.as(with: alias)
     }
     return self
   }
