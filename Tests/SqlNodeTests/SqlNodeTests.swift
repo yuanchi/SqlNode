@@ -98,11 +98,11 @@ class SqlNodeTests: XCTestCase {
       let sql = "SELECT e.id, e.firstname, e.lastname, p.level, acc.balc\n"
         + "FROM EMPLOYEE as e\n"
         + "LEFT OUTER JOIN POINT as p\n"
-        + "ON e.id = p.emp_id\n"
+        + " ON e.id = p.emp_id\n"
         + "LEFT OUTER JOIN (SELECT a.emp_id as emid, a.balance as balc, a.address as addr\n"
         + "FROM ACCOUNT as a\n"
         + "WHERE a.balance > 3000 OR a.openDate > '2011-01-01') as acc\n"
-        + "ON e.id = acc.emid\n"
+        + " ON e.id = acc.emid\n"
         + "WHERE MONTH(e.birth) = 3 AND YEAR(e.startDate) = 2010"
       XCTAssertEqual(sql, root.toSql())
 

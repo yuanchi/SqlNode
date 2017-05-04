@@ -1,88 +1,79 @@
 open class From: TargetExpressible {
-  public func addJoin(with type: String) -> Self {
-    let join = create(with: Join.self)
-    join.type = type
-    return add(child: join)
+  override public func `as`(_ alias: String) -> Self {
+    if let found = children.last as? JoinSubquery {
+      found.as(with: alias)
+      return self
+    }
+    _ = super.as(alias)
+    return self
   }
-  public func join() -> Self {
-    return addJoin(with: "JOIN")
+  func joinExpression() -> JoinExpression {
+    let je = create(with: JoinExpression.self)
+    _ = add(child: je)
+    return je
+  }
+  func joinSubquery() -> JoinSubquery {
+    let js = create(with: JoinSubquery.self)
+    _ = add(child: js)
+    return js
+  }
+  func join(with type: String, _ target: String) -> Self {
+    let je = joinExpression()
+    je.joinType = type
+    je.expression = target
+    return self
+  }
+  func join(with type: String, _ config: (SelectExpression) -> Void) -> Self {
+    let js = joinSubquery()
+    js.joinType = type
+    _ = js.subquery(with: config)
+    return self
   }
   public func join(_ target: String) -> Self {
-    return self.join().t(target)
+    return join(with: "JOIN", target)
   }
   public func join(_ config: (SelectExpression) -> Void) -> Self {
-    _ = self.join().subquery(with: config)
-    return self
-  }
-  public func innerJoin() -> Self {
-    return self.addJoin(with: "INNER JOIN")
+    return join(with: "JOIN", config)
   }
   public func innerJoin(_ target: String) -> Self {
-    return self.innerJoin().t(target)
+    return join(with: "INNER JOIN", target)
   }
   public func innerJoin(_ config: (SelectExpression) -> Void) -> Self {
-    _ = self.innerJoin().subquery(with: config)
-    return self
-  }
-  public func leftOuterJoin() -> Self {
-    return self.addJoin(with: "LEFT OUTER JOIN")
+    return join(with: "INNER JOIN", config)
   }
   public func leftOuterJoin(_ target: String) -> Self {
-    return self.leftOuterJoin().t(target)
+    return join(with: "LEFT OUTER JOIN", target)
   }
   public func leftOuterJoin(_ config: (SelectExpression) -> Void) -> Self {
-    _ = self.leftOuterJoin().subquery(with: config)
-    return self
-  }
-  public func rightOuterJoin() -> Self {
-    return self.addJoin(with: "RIGHT OUTER JOIN")
+    return join(with: "LEFT OUTER JOIN", config)
   }
   public func rightOuterJoin(_ target: String) -> Self {
-    return self.rightOuterJoin().t(target)
+    return join(with: "RIGHT OUTER JOIN", target)
   }
   public func rightOuterJoin(_ config: (SelectExpression) -> Void) -> Self {
-    _ = self.rightOuterJoin().subquery(with: config)
-    return self
-  }
-  public func crossJoin() -> Self {
-    return self.addJoin(with: "CROSS JOIN")
+    return join(with: "RIGHT OUTER JOIN", config)
   }
   public func crossJoin(_ target: String) -> Self {
-    return self.crossJoin().t(target)
+    return join(with: "CROSS JOIN", target)
   }
   public func crossJoin(_ config: (SelectExpression) -> Void) -> Self {
-    _ = self.crossJoin().subquery(with: config)
-    return self
+    return join(with: "CROSS JOIN", config)
   }
   public func on() -> On {
-    let on = create(with: On.self)
-    _ = add(child: on)
-    return on
+    return (children.last as! JoinExpression).on()
   }
-  public func on(_ expressions: String...) -> Self {
-    let on = self.on()
-    for e in expressions {
-      _ = on.and(e)
-    }
+  public func on(_ conditions: String...) -> Self {
+    _ = (children.last as! JoinExpression).on(conditions)
     return self
   }
   override open func toSql() -> String {
-    let joinFound = sqlChildren.contains{ element in
-        return element is Join || element is On
-    }
+    let joinFound = sqlChildren.contains { $0 is JoinExpression }
     var r = ""
     if joinFound {
-      let first = sqlChildren.first
-      r = sqlChildren.map{ element in
-        let sql = element.toSql()
-        if element is SimpleExpression || element is SelectExpression {
-          return element === first ? sql : " \(sql)"
-        }
-        if element is Join || element is On {
-          return "\n\(sql)"
-        }
-        return sql
-      }.joined(separator: "")
+      r = sqlChildren
+        .map { $0.toSql() }
+        .filter { !$0.isEmpty }
+        .joined(separator: "\n")
     } else {
       r = super.toSql()
     }
@@ -92,5 +83,9 @@ open class From: TargetExpressible {
   override open func copy() -> From {
     let copy = super.copy() as! From
     return copy
+  }
+  public func removeIfNotReferenced() -> Self {
+    // TODO
+    return self
   }
 }
