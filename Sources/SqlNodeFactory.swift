@@ -15,7 +15,9 @@ public class SqlNodeFactory {
       ObjectIdentifier(SubqueryCondition.self): SqlNodeFactory.initSubqueryCondition,
       ObjectIdentifier(On.self): SqlNodeFactory.initOn,
       ObjectIdentifier(SimpleExpression.self): SqlNodeFactory.initSimpleExpression,
-      ObjectIdentifier(Join.self): SqlNodeFactory.initJoin
+      ObjectIdentifier(Join.self): SqlNodeFactory.initJoin,
+      ObjectIdentifier(JoinExpression.self): SqlNodeFactory.joinExpression,
+      ObjectIdentifier(JoinSubquery.self): SqlNodeFactory.joinSubquery
     ]
     return defaults
   }
@@ -86,5 +88,11 @@ public class SqlNodeFactory {
   }
   static func initJoin() -> Join {
     return Join()
+  }
+  static func joinExpression() -> JoinExpression {
+    return JoinExpression()
+  }
+  static func joinSubquery() -> JoinSubquery {
+    return JoinSubquery()
   }
 }
