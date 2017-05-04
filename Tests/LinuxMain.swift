@@ -11,5 +11,5 @@ XCTMain([
     testCase(FromTests.allTests),
     testCase(FilterConditionsTests.allTests),
     testCase(SubqueryConditionTests.allTests),
-    testCase(JoinTests.allTests),
+    //testCase(JoinTests.allTests),
 ])
