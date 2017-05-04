@@ -1,7 +1,7 @@
 open class From: TargetExpressible {
   override public func `as`(_ alias: String) -> Self {
     if let found = children.last as? JoinSubquery {
-      found.as(with: alias)
+      _ = found.as(alias)
       return self
     }
     _ = super.as(alias)
@@ -60,14 +60,14 @@ open class From: TargetExpressible {
     return join(with: "CROSS JOIN", config)
   }
   public func on() -> On {
-    return (children.last as! JoinExpression).on()
+    return (children.last as! Joinable).on()
   }
   public func on(_ conditions: String...) -> Self {
-    _ = (children.last as! JoinExpression).on(conditions)
+    _ = (children.last as! Joinable).on(conditions)
     return self
   }
   override open func toSql() -> String {
-    let joinFound = sqlChildren.contains { $0 is JoinExpression }
+    let joinFound = sqlChildren.contains { $0 is Joinable }
     var r = ""
     if joinFound {
       r = sqlChildren
