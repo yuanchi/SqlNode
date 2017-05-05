@@ -34,7 +34,7 @@ public class SqlNodeFactory {
       "Singleton not allowed to be modified.\n"
       + "If you want change factory config, replace factory with mutable one.\n"
       + "You can call directly SqlNode.configFactory(with:),\n"
-      + "or use SqlNode.newInstance() to get mutable one."
+      + "or use SqlNodeFactory.newInstance() to get mutable one."
     )
     registers[ObjectIdentifier(key)] = factory
     return self
