@@ -1,6 +1,10 @@
 public class SqlNodeFactory {
-  var registers: [ObjectIdentifier: ()-> SqlNode]
-  open class func initRegisters() -> [ObjectIdentifier: () -> SqlNode]{
+  public static let shared: SqlNodeFactory = {
+    let factory = SqlNodeFactory()
+    return factory
+  } ()
+  private var registers: [ObjectIdentifier: ()-> SqlNode]
+  static func initRegisters() -> [ObjectIdentifier: () -> SqlNode]{
     let defaults: [ObjectIdentifier: () -> SqlNode] = [
     ObjectIdentifier(SelectExpression.self): SqlNodeFactory.initSelectExpression,
       ObjectIdentifier(Select.self): SqlNodeFactory.initSelect,
@@ -20,10 +24,18 @@ public class SqlNodeFactory {
     ]
     return defaults
   }
-  public init() {
+  private init() {
     registers = SqlNodeFactory.initRegisters()
   }
   public func addOrReplace(with key: SqlNode.Type, _ factory: @escaping () -> SqlNode) -> Self {
+    let passed = SqlNodeFactory.shared !== self
+    precondition(
+      passed,
+      "Singleton not allowed to be modified.\n"
+      + "If you want change factory config, replace factory with mutable one.\n"
+      + "You can call directly SqlNode.configFactory(with:),\n"
+      + "or use SqlNode.newInstance() to get mutable one."
+    )
     registers[ObjectIdentifier(key)] = factory
     return self
   }
@@ -43,7 +55,7 @@ public class SqlNodeFactory {
       "key: \(key) not found")
     return registers[id]!() as! T
   }
-  public class func initialize() -> SqlNodeFactory {
+  public class func newInstance() -> SqlNodeFactory {
     return SqlNodeFactory()
   }
   static func initSelectExpression() -> SelectExpression {
