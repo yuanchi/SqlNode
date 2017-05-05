@@ -4,9 +4,8 @@ import XCTest
 class RootNodeTests: XCTestCase {
   func initialize() {
     _ = RootNode.initialize()
-      .config{_ = ($0 as! RootNode)
-        .factory!
-        .add(with: TestNode.self, { TestNode() })
+      .configFactory{
+        _ = $0.add(with: TestNode.self, { TestNode() })
         .replace(with: From.self, { From() })}
   }
   func paramVals() {

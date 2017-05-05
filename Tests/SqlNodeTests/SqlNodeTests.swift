@@ -140,7 +140,7 @@ class SqlNodeTests: XCTestCase {
       _ = root.add(children: c1, c2, c3)
       _ = c1.add(children: c1_1, c1_2)
 
-      let factory = SqlNodeFactory.initialize()
+      let factory = SqlNodeFactory.shared
       root.factory = factory
       let id = "This is root node"
       root.id = id
