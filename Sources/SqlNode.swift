@@ -47,7 +47,7 @@ open class SqlNode: TreeNode, Identifiable {
     return self.factory!.create(with: key)
   }
   public func configFactory(with config: (SqlNodeFactory) -> Void) -> Self {
-    if self.factory == nil || (self.factory!) === SqlNodeFactory.shared {
+    if self.factory == nil || self.factory === SqlNodeFactory.shared {
       self.factory = SqlNodeFactory.newInstance()
     }
     config(self.factory!)
