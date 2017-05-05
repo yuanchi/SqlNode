@@ -34,17 +34,15 @@ open class SqlNode: TreeNode, Identifiable {
   /*
   * All inner SqlNodes are initializd via this method.
   * When this method is called, it firstly searches the top most node to check if there is the factory.
-  * If there is no factory existed on the top most node, it will initialize one on its own.
+  * If there is no factory existed on the top most node, it will help the top most to initialize one.
   * My intent is to keep the consistency, flexibility configurable, use convenience, and try to reduce memory consumption.
   */
   public func create<T:SqlNode>(with key: T.Type) -> T {
-    if let node = topMost().factory?.create(with: key) {
-      return node
+    let tm = topMost()
+    if tm.factory == nil {
+      tm.factory = SqlNodeFactory.shared
     }
-    if self.factory == nil {
-      self.factory = SqlNodeFactory.shared
-    }
-    return self.factory!.create(with: key)
+    return tm.factory!.create(with: key)
   }
   public func configFactory(with config: (SqlNodeFactory) -> Void) -> Self {
     let tm = topMost()
