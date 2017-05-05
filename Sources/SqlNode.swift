@@ -47,10 +47,11 @@ open class SqlNode: TreeNode, Identifiable {
     return self.factory!.create(with: key)
   }
   public func configFactory(with config: (SqlNodeFactory) -> Void) -> Self {
-    if self.factory == nil || self.factory === SqlNodeFactory.shared {
-      self.factory = SqlNodeFactory.newInstance()
+    let tm = topMost()
+    if tm.factory == nil || tm.factory === SqlNodeFactory.shared {
+      tm.factory = SqlNodeFactory.newInstance()
     }
-    config(self.factory!)
+    config(tm.factory!)
     return self
   }
   public func topMost() -> SqlNode {
